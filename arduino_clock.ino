@@ -5,8 +5,8 @@
 #define LOAD_CS_PIN 10
 #define CLK_PIN 9
 #define MATRIX_COUNT 2
-#define HOUR_ADJUST_PIN 8
-#define HOUR_ADJUST_OUT_PIN 7
+#define HOUR_ADJUST_PIN 2
+#define MINUTE_ADJUST_PIN 3
 
 LedControl led_control = LedControl(MATRIX_DATA_IN_PIN, CLK_PIN, LOAD_CS_PIN, MATRIX_COUNT);
 int device_count;
@@ -74,7 +74,7 @@ void setup() {
     reset_screen(device_addr);
   }
   pinMode(HOUR_ADJUST_PIN, INPUT_PULLUP);
-  pinMode(HOUR_ADJUST_OUT_PIN, OUTPUT);
+  pinMode(MINUTE_ADJUST_PIN, INPUT_PULLUP);
 }
 
 void reset_screen(int device_addr) {
@@ -82,34 +82,56 @@ void reset_screen(int device_addr) {
   led_control.setIntensity(0, 8);
 }
 
-int second = 51;
-int minute = 59;
+int second = 00;
+int minute = 00;
 int hour = 12;
 void loop() {
-  /*digitalWrite(HOUR_ADJUST_OUT_PIN, HIGH);
-    bool hour_change = digitalRead(HOUR_ADJUST_PIN);
-    if (!hour_change) {
-    hour += 1;
-    }*/
-  //led_control.clearDisplay(0);
-  //led_control.setRow(0, 0, 1);
+  bool __had_updates = update_hour_and_minute();
   update_time_display(0, 1);
-  delay(10);
+  if (__had_updates){
+    delay(200);
+  } else {
+    inc_second();
+    delay(1000);
+  }
+}
+
+bool update_hour_and_minute(){
+  bool __adj_hour = digitalRead(HOUR_ADJUST_PIN);
+  bool __adj_minute = digitalRead(MINUTE_ADJUST_PIN);
+  if (__adj_hour){
+    inc_hour();
+  }
+  if (__adj_minute){
+    inc_minute();
+  }
+  return __adj_hour || __adj_minute;
+}
+
+void inc_hour(){
+  hour++;
+  if (hour == 24){
+    hour = 0;
+  }
+}
+
+void inc_minute(){
+  minute++;
+  if (minute == 60){
+    minute = 0;
+    inc_hour();
+  }
+}
+
+void inc_second(){
+  second++;
+  if (second == 60){
+    second = 0;
+    inc_minute();
+  }
 }
 
 void update_time_display(int _hour_display_addr, int _minute_display_addr) {
-  second++;
-  if (second == 60) {
-    second = 0;
-    minute++;
-  }
-  if (minute == 60) {
-    minute = 0;
-    hour++;
-  }
-  if (hour == 24) {
-    hour = 0;
-  }
   display_number(_hour_display_addr, hour);
   display_number(_minute_display_addr, minute);
 }
