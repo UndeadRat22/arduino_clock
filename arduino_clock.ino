@@ -11,7 +11,11 @@
 LedControl led_control = LedControl(MATRIX_DATA_IN_PIN, CLK_PIN, LOAD_CS_PIN, MATRIX_COUNT);
 int device_count;
 
-byte digits[10][3] = {
+//could be more in hex or less in octal systems
+#define DIGIT_COUNT 10
+#define DIGIT_WIDTH 3
+
+byte digits[DIGIT_COUNT][DIGIT_WIDTH] = {
   {
     0b01111110,
     0b01000010,
@@ -110,15 +114,15 @@ void update_time_display(int _hour_display_addr, int _minute_display_addr) {
   display_number(_minute_display_addr, minute);
 }
 
-//displays a number between 00 and 99
+//displays a number between 00 and XX (X is max single digit in a given system, i.e. 9 in decimal)
 int offset = 4;
 void display_number(int _device_addr, int _number_to_show) {
-  int __lower_digit = _number_to_show % 10;
-  int __upper_digit = _number_to_show / 10;
-  for (int i = 0; i < 3; i++) {
+  int __lower_digit = _number_to_show % DIGIT_COUNT;
+  int __upper_digit = _number_to_show / DIGIT_COUNT;
+  for (int i = 0; i < DIGIT_WIDTH; i++) {
     led_control.setRow(_device_addr, i + 1, digits[__upper_digit][i]);
   }
-  for (int i = 0; i < 3; i++) {
+  for (int i = 0; i < DIGIT_WIDTH; i++) {
     led_control.setRow(_device_addr, i + offset + 1, digits[__lower_digit][i]);
   }
 }
