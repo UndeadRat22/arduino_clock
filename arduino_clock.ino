@@ -1,5 +1,4 @@
 #include <LedControl.h>
-#include <Time.h>
 
 #define MATRIX_DATA_IN_PIN 11
 #define LOAD_CS_PIN 10
